@@ -122,15 +122,22 @@ main() {
 scan_for_build_prop() {
   local base_dir=$1
 
-  # Prioritize the system directory
+  # First, prioritize the 'system' directory
   local system_build_prop="$base_dir/system/build.prop"
   if [ -f "$system_build_prop" ]; then
     echo "$system_build_prop"
     return 0
   fi
 
-  # If not found in system, search other directories
-  local found_files=$(find "$base_dir" -type f -name "build.prop" ! -path "$system_build_prop")
+  # Next, check the 'vendor' directory
+  local vendor_build_prop="$base_dir/vendor/build.prop"
+  if [ -f "$vendor_build_prop" ]; then
+    echo "$vendor_build_prop"
+    return 0
+  fi
+
+  # If not found in 'system' or 'vendor', search other directories
+  local found_files=$(find "$base_dir" -type f -name "build.prop" ! -path "$system_build_prop" ! -path "$vendor_build_prop")
 
   if [ -z "$found_files" ]; then
     return 1
@@ -138,6 +145,7 @@ scan_for_build_prop() {
 
   echo "$found_files" | head -n 1  # Return the first found file path
 }
+
 
 
 # Modified search_build_prop function to include scanning with prioritization
