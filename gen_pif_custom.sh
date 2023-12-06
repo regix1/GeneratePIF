@@ -119,6 +119,23 @@ main() {
   cd ../
 }
 
+# New function to handle search
+search_build_prop() {
+  read -p "Enter the directory path to search for build.prop: " search_dir
+  if [ ! -d "$search_dir" ]; then
+    echo "Directory not found: $search_dir"
+    exit 1  # Use exit instead of return
+  fi
+
+  if [ ! -f "$search_dir/build.prop" ]; then
+    echo "No build.prop file found in the provided directory: $search_dir"
+    exit 1  # Use exit instead of return
+  fi
+
+  echo "build.prop found in $search_dir"
+  cp "$search_dir/build.prop" ./
+}
+
 
 case $0 in
   *.sh) shdir="$0";;
@@ -128,19 +145,22 @@ shdir=$(dirname "$(readlink -f "$shdir")");
 
 readarray -t dir_arr < <(find . -maxdepth 1 -type d)
 for ((a = 1 ; a < ${#dir_arr[@]} ; a++)); do echo "$a. ${dir_arr[$a]}"; done
+echo "3. search"
 
 read -p "Enter number: " arr_index
 if [ "$arr_index" = "" ]; then
   echo "What the...?"
-  return
+  exit 1
 fi
 if [ "$arr_index" -gt "${#dir_arr[@]}" ] || [ "$arr_index" -lt 0 ]; then
   echo Invalid index!
   echo Exiting...
-  return
+  exit 1
 elif [ "${dir_arr[$arr_index]}" = "./.git" ]; then
   echo This is a .git folder. Rerun the script.
-  return
+  exit 1
+elif [ "$arr_index" = "3" ]; then
+  search_build_prop || exit 1
 else
   cd $shdir
   cd ${dir_arr[$arr_index]}
