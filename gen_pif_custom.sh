@@ -172,26 +172,33 @@ case $0 in
 esac;
 shdir=$(dirname "$(readlink -f "$shdir")");
 
-readarray -t dir_arr < <(find . -maxdepth 1 -type d)
-for ((a = 1 ; a < ${#dir_arr[@]} ; a++)); do echo "$a. ${dir_arr[$a]}"; done
+readarray -t dir_arr < <(find . -maxdepth 1 -type d -not -path "./.git")
+for ((a = 0 ; a < ${#dir_arr[@]} ; a++)); do echo "$((a+1)). ${dir_arr[$a]}"; done
 echo "3. search"
 
 read -p "Enter number: " arr_index
-if [ "$arr_index" = "" ]; then
-  echo "What the...?"
+if [ -z "$arr_index" ]; then
+  echo "No option selected."
   exit 1
 fi
-if [ "$arr_index" -gt "${#dir_arr[@]}" ] || [ "$arr_index" -lt 0 ]; then
-  echo Invalid index!
-  echo Exiting...
-  exit 1
-elif [ "${dir_arr[$arr_index]}" = "./.git" ]; then
-  echo This is a .git folder. Rerun the script.
-  exit 1
-elif [ "$arr_index" = "3" ]; then
+
+# Adjusted logic for handling user selection
+if [ "$arr_index" = "3" ]; then
   search_build_prop || exit 1
 else
-  cd $shdir
-  cd ${dir_arr[$arr_index]}
+  if [ "$arr_index" -gt "${#dir_arr[@]}" ] || [ "$arr_index" -lt 1 ]; then
+    echo "Invalid index!"
+    echo "Exiting..."
+    exit 1
+  fi
+
+  selected_dir=${dir_arr[$((arr_index-1))]}
+  if [ "$selected_dir" = "./.git" ]; then
+    echo "This is a .git folder. Rerun the script."
+    exit 1
+  fi
+
+  cd "$shdir"
+  cd "$selected_dir"
   main
 fi
