@@ -124,16 +124,17 @@ search_build_prop() {
   read -p "Enter the directory path to search for build.prop: " search_dir
   if [ ! -d "$search_dir" ]; then
     echo "Directory not found: $search_dir"
-    exit 1  # Use exit instead of return
+    exit 1
   fi
 
   if [ ! -f "$search_dir/build.prop" ]; then
     echo "No build.prop file found in the provided directory: $search_dir"
-    exit 1  # Use exit instead of return
+    exit 1
   fi
 
   echo "build.prop found in $search_dir"
   cp "$search_dir/build.prop" ./
+  main  # Call main function to process the found build.prop
 }
 
 
