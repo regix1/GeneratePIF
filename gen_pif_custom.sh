@@ -119,23 +119,39 @@ main() {
   cd ../
 }
 
-# New function to handle search
+# Function to scan for build.prop files
+scan_for_build_prop() {
+  local search_dir=$1
+  echo "Scanning for build.prop files in $search_dir and its subdirectories..."
+  local found_files=$(find "$search_dir" -type f -name "build.prop")
+
+  if [ -z "$found_files" ]; then
+    echo "No build.prop files found in $search_dir."
+    return 1
+  fi
+
+  echo "Found the following build.prop file(s):"
+  echo "$found_files"
+  return 0
+}
+
+# Modified search_build_prop function to include scanning
 search_build_prop() {
-  read -p "Enter the directory path to search for build.prop: " search_dir
+  read -e -p "Enter the directory path to search for build.prop: " search_dir
   if [ ! -d "$search_dir" ]; then
     echo "Directory not found: $search_dir"
-    exit 1
+    return 1
   fi
 
-  if [ ! -f "$search_dir/build.prop" ]; then
-    echo "No build.prop file found in the provided directory: $search_dir"
-    exit 1
-  fi
+  scan_for_build_prop "$search_dir" || return 1
 
-  echo "build.prop found in $search_dir"
-  cp "$search_dir/build.prop" ./
+  # Assuming you want to process the first found file
+  local first_file=$(echo "$found_files" | head -n 1)
+  echo "Using $first_file for processing."
+  cp "$first_file" ./
   main  # Call main function to process the found build.prop
 }
+
 
 
 case $0 in
