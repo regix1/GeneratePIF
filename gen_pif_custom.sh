@@ -142,7 +142,7 @@ scan_for_build_prop() {
 
   echo "Found the following build.prop file(s):"
   echo "$found_files"
-  return 0
+  echo "$found_files" | head -n 1  # Return the first found file path
 }
 
 # Modified search_build_prop function to include scanning with prioritization
@@ -155,15 +155,15 @@ search_build_prop() {
 
   local selected_build_prop
   if ! selected_build_prop=$(scan_for_build_prop "$base_dir"); then
+    echo "No suitable build.prop file found. Please check the directory and try again."
     return 1
   fi
 
-  # Use the first found or prioritized build.prop file
-  local first_file=$(echo "$selected_build_prop" | head -n 1)
-  echo "Using $first_file for processing."
-  cp "$first_file" ./
+  echo "Using $selected_build_prop for processing."
+  cp "$selected_build_prop" ./
   main  # Call main function to process the found build.prop
 }
+
 
 
 case $0 in
