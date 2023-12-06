@@ -119,14 +119,24 @@ main() {
   cd ../
 }
 
-# Function to scan for build.prop files
+# Function to scan for build.prop files with prioritization
 scan_for_build_prop() {
-  local search_dir=$1
-  echo "Scanning for build.prop files in $search_dir and its subdirectories..."
-  local found_files=$(find "$search_dir" -type f -name "build.prop")
+  local base_dir=$1
+  echo "Scanning for build.prop files in $base_dir and its subdirectories..."
+
+  # Prioritize the system directory
+  local system_build_prop="$base_dir/system/build.prop"
+  if [ -f "$system_build_prop" ]; then
+    echo "Found build.prop in the system directory: $system_build_prop"
+    echo "$system_build_prop"
+    return 0
+  fi
+
+  # If not found in system, search other directories
+  local found_files=$(find "$base_dir" -type f -name "build.prop" ! -path "$system_build_prop")
 
   if [ -z "$found_files" ]; then
-    echo "No build.prop files found in $search_dir."
+    echo "No build.prop files found in $base_dir."
     return 1
   fi
 
@@ -135,23 +145,25 @@ scan_for_build_prop() {
   return 0
 }
 
-# Modified search_build_prop function to include scanning
+# Modified search_build_prop function to include scanning with prioritization
 search_build_prop() {
-  read -e -p "Enter the directory path to search for build.prop: " search_dir
-  if [ ! -d "$search_dir" ]; then
-    echo "Directory not found: $search_dir"
+  read -e -p "Enter the directory path to search for build.prop: " base_dir
+  if [ ! -d "$base_dir" ]; then
+    echo "Directory not found: $base_dir"
     return 1
   fi
 
-  scan_for_build_prop "$search_dir" || return 1
+  local selected_build_prop
+  if ! selected_build_prop=$(scan_for_build_prop "$base_dir"); then
+    return 1
+  fi
 
-  # Assuming you want to process the first found file
-  local first_file=$(echo "$found_files" | head -n 1)
+  # Use the first found or prioritized build.prop file
+  local first_file=$(echo "$selected_build_prop" | head -n 1)
   echo "Using $first_file for processing."
   cp "$first_file" ./
   main  # Call main function to process the found build.prop
 }
-
 
 
 case $0 in
