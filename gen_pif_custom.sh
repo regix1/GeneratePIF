@@ -167,9 +167,38 @@ search_build_prop() {
   main  # Call main function to process the found build.prop
 }
 
+generate_options() {
+  local i=1
+  for dir in "${dir_arr[@]}"; do
+    echo "$i. $dir"
+    ((i++))
+  done
+  echo "$i. search"
+}
 
+# Process user selection with dynamic option numbering
+process_selection() {
+  local arr_index=$1
+  local total_options=${#dir_arr[@]}+1
 
+  if [ "$arr_index" -eq "$total_options" ]; then
+    search_build_prop || exit 1
+  elif [ "$arr_index" -gt 0 ] && [ "$arr_index" -le "${#dir_arr[@]}" ]; then
+    local selected_dir=${dir_arr[$((arr_index-1))]}
+    if [ "$selected_dir" = "./.git" ]; then
+      echo "This is a .git folder. Rerun the script."
+      exit 1
+    fi
+    cd "$shdir"
+    cd "$selected_dir"
+    main
+  else
+    echo "Invalid option selected. Exiting..."
+    exit 1
+  fi
+}
 
+# Main execution
 case $0 in
   *.sh) shdir="$0";;
      *) shdir="$(lsof -p $$ 2>/dev/null | grep -o '/.*gen_pif_custom.sh$')";;
@@ -177,8 +206,7 @@ esac;
 shdir=$(dirname "$(readlink -f "$shdir")");
 
 readarray -t dir_arr < <(find . -maxdepth 1 -type d -not -path "./.git")
-for ((a = 0 ; a < ${#dir_arr[@]} ; a++)); do echo "$((a+1)). ${dir_arr[$a]}"; done
-echo "3. search"
+generate_options
 
 read -p "Enter number: " arr_index
 if [ -z "$arr_index" ]; then
@@ -186,23 +214,4 @@ if [ -z "$arr_index" ]; then
   exit 1
 fi
 
-# Adjusted logic for handling user selection
-if [ "$arr_index" = "3" ]; then
-  search_build_prop || exit 1
-else
-  if [ "$arr_index" -gt "${#dir_arr[@]}" ] || [ "$arr_index" -lt 1 ]; then
-    echo "Invalid index!"
-    echo "Exiting..."
-    exit 1
-  fi
-
-  selected_dir=${dir_arr[$((arr_index-1))]}
-  if [ "$selected_dir" = "./.git" ]; then
-    echo "This is a .git folder. Rerun the script."
-    exit 1
-  fi
-
-  cd "$shdir"
-  cd "$selected_dir"
-  main
-fi
+process_selection "$arr_index"
