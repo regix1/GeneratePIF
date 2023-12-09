@@ -6,7 +6,8 @@
 
 echo -e "system build.prop to custom.pif.json/.prop creator \
     \nby osm0sis @ xda-developers \
-    \nand modified by Juleast @ https://github.com/juleast";
+    \nmodified by Juleast @ https://github.com/juleast
+    \nand modified again by regix1 @ https://github.com/regix1";
 
 item() { echo -e "\n- $@"; }
 die() { 
