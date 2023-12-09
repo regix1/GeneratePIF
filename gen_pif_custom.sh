@@ -179,12 +179,12 @@ generate_options() {
 # Process user selection with dynamic option numbering
 process_selection() {
   local arr_index=$1
-  local total_options=${#dir_arr[@]}+1
+  local total_options=$(( ${#dir_arr[@]} + 1 ))
 
   if [ "$arr_index" -eq "$total_options" ]; then
     search_build_prop || exit 1
   elif [ "$arr_index" -gt 0 ] && [ "$arr_index" -le "${#dir_arr[@]}" ]; then
-    local selected_dir=${dir_arr[$((arr_index-1))]}
+    local selected_dir=${dir_arr[$((arr_index - 1))]}
     if [ "$selected_dir" = "./.git" ]; then
       echo "This is a .git folder. Rerun the script."
       exit 1
