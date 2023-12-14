@@ -126,29 +126,13 @@ case $0 in
 esac;
 shdir=$(dirname "$(readlink -f "$shdir")");
 
-echo -e "# Choose your cloned directory by referencing the number \
-  \n# next to each directory name. (ignore .git or empty name directories)";
-readarray -t dir_arr < <(find . -maxdepth 1 -type d)
-for ((a = 1 ; a < ${#dir_arr[@]} ; a++)); do
-  IFS='/' read -r -a split_dir <<< "${dir_arr[$a]}"
-  echo "$a. ${split_dir[-1]}"
-done
+readarray -t dir_arr < <(find . -maxdepth 1 -type d -not -path "./.git")
+generate_options
 
-echo ""
 read -p "Enter number: " arr_index
-if [ "$arr_index" = "" ]; then
-  echo "What the...?"
-  return
+if [ -z "$arr_index" ]; then
+  echo "No option selected."
+  exit 1
 fi
-if [ "$arr_index" -gt "${#dir_arr[@]}" ] || [ "$arr_index" -lt 0 ]; then
-  echo Invalid index!
-  echo Exiting...
-  return
-elif [ "${dir_arr[$arr_index]}" = "./.git" ]; then
-  echo This is a .git folder. Rerun the script.
-  return
-else
-  cd $shdir
-  cd ${dir_arr[$arr_index]}
-  main
-fi
+
+process_selection "$arr_index"
