@@ -76,22 +76,37 @@ main() {
     echo "$SECURITY_PATCH";
   fi;
 
-  item "Parsing build first API level ...";
-  FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.product.first_api_level);
-  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.first_api_level);
-  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.api_level);
+item "Parsing build first API level ...";
+FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.product.first_api_level);
+[ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.first_api_level);
+[ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.api_level);
 
-  if [ -z "$FIRST_API_LEVEL" ]; then
-    [ ! -f vendor-build.prop ] && die "No first API level found, add vendor-build.prop";
-    item "No first API level found, falling back to build SDK version ...";
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.build.version.sdk);
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.system.build.version.sdk);
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.build.version.sdk);
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.system.build.version.sdk);
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.vendor.build.version.sdk);
-    [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop product-build.prop ro.product.build.version.sdk);
-  fi;
-  echo "$FIRST_API_LEVEL";
+if [ -z "$FIRST_API_LEVEL" ]; then
+  [ ! -f vendor-build.prop ] && die "No first API level found, add vendor-build.prop";
+  item "No first API level found, falling back to build SDK version ...";
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.build.version.sdk);
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.system.build.version.sdk);
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.build.version.sdk);
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.system.build.version.sdk);
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.vendor.build.version.sdk);
+  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop product-build.prop ro.product.build.version.sdk);
+fi;
+echo "Detected First API Level: $FIRST_API_LEVEL";
+
+# New section for user input
+read -p "Do you want to use the detected API Level ($FIRST_API_LEVEL)? Enter 'yes' to use it or 'no' to use 'null': " user_choice
+case $user_choice in
+  [Yy][Ee][Ss])
+    echo "Using API Level: $FIRST_API_LEVEL"
+    ;;
+  [Nn][Oo])
+    FIRST_API_LEVEL="null"
+    echo "API Level set to 'null'"
+    ;;
+  *)
+    echo "Invalid input. Using detected API Level: $FIRST_API_LEVEL"
+    ;;
+esac
 
   if [ "$FIRST_API_LEVEL" -gt 32 ]; then
     item "First API level 33 or higher, resetting to 32 ...";
@@ -119,6 +134,16 @@ main() {
   cd ../
 }
 
+
+generate_options() {
+  echo "Available options:"
+  local i=1
+  for dir in "${dir_arr[@]}"; do
+    echo "$i. $dir"
+    ((i++))
+  done
+  echo "$i. Search for build.prop"
+}
 
 case $0 in
   *.sh) shdir="$0";;
