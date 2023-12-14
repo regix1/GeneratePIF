@@ -5,7 +5,8 @@
 # ROM of a device you want to spoof values from
 echo -e "### System build.prop to custom.pif.json/.prop creator ### \
     \n# by osm0sis @ xda-developers \
-    \n# and modified by Juleast @ https://github.com/juleast \n#";
+    \n# modified by Juleast @ https://github.com/juleast \
+    \n# and modified again by regix1 @ https://github.com/regix1 \n#";
 
 item() { echo -e "\n- $@"; }
 die() { 
