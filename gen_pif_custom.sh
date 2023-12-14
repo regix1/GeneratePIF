@@ -134,15 +134,83 @@ esac
   cd ../
 }
 
+scan_for_build_prop() {
+  local base_dir=$1
+
+  # First, prioritize the 'system' directory
+  local system_build_prop="$base_dir/system/build.prop"
+  if [ -f "$system_build_prop" ]; then
+    echo "$system_build_prop"
+    return 0
+  fi
+
+  # Next, check the 'vendor' directory
+  local vendor_build_prop="$base_dir/vendor/build.prop"
+  if [ -f "$vendor_build_prop" ]; then
+    echo "$vendor_build_prop"
+    return 0
+  fi
+
+  # If not found in 'system' or 'vendor', search other directories
+  local found_files=$(find "$base_dir" -type f -name "build.prop" ! -path "$system_build_prop" ! -path "$vendor_build_prop")
+
+  if [ -z "$found_files" ]; then
+    return 1
+  fi
+
+  echo "$found_files" | head -n 1  # Return the first found file path
+}
+
+
+
+# Modified search_build_prop function to include scanning with prioritization
+search_build_prop() {
+  read -e -p "Enter the directory path to search for build.prop: " base_dir
+  if [ ! -d "$base_dir" ]; then
+    echo "Directory not found: $base_dir"
+    return 1
+  fi
+
+  local selected_build_prop
+  if ! selected_build_prop=$(scan_for_build_prop "$base_dir"); then
+    echo "No suitable build.prop file found. Please check the directory and try again."
+    return 1
+  fi
+
+  echo "Using $selected_build_prop for processing."
+  cp "$selected_build_prop" ./
+  main  # Call main function to process the found build.prop
+}
 
 generate_options() {
-  echo "Available options:"
   local i=1
   for dir in "${dir_arr[@]}"; do
     echo "$i. $dir"
     ((i++))
   done
-  echo "$i. Search for build.prop"
+  echo "$i. search"
+}
+
+# Process user selection with dynamic option numbering
+process_selection() {
+  local arr_index=$1
+  local total_options=$(( ${#dir_arr[@]} + 1 ))
+
+  if [ "$arr_index" -eq "$total_options" ]; then
+    search_build_prop || exit 1
+  elif [ "$arr_index" -gt 0 ] && [ "$arr_index" -le "${#dir_arr[@]}" ]; then
+    local selected_dir=${dir_arr[$((arr_index - 1))]}
+    if [ "$selected_dir" = "./.git" ]; then
+      echo "This is a .git folder. Rerun the script."
+      exit 1
+    fi
+    cd "$shdir"
+    cd "$selected_dir"
+    main
+  else
+    echo "Invalid option selected. Exiting..."
+    exit 1
+  fi
 }
 
 case $0 in
