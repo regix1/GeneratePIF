@@ -81,10 +81,11 @@ FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.product.first_api_level);
 [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.first_api_level);
 [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop vendor-build.prop ro.board.api_level);
 
-if [ -z "$FIRST_API_LEVEL" ]; then
+# Check if FIRST_API_LEVEL is not set or not a number, and handle accordingly
+if [ -z "$FIRST_API_LEVEL" ] || ! [[ "$FIRST_API_LEVEL" =~ ^[0-9]+$ ]]; then
   [ ! -f vendor-build.prop ] && die "No first API level found, add vendor-build.prop";
   item "No first API level found, falling back to build SDK version ...";
-  [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.build.version.sdk);
+  FIRST_API_LEVEL=$(file_getprop build.prop ro.build.version.sdk);
   [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop build.prop ro.system.build.version.sdk);
   [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.build.version.sdk);
   [ -z "$FIRST_API_LEVEL" ] && FIRST_API_LEVEL=$(file_getprop system-build.prop ro.system.build.version.sdk);
