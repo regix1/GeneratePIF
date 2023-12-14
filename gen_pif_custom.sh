@@ -66,7 +66,14 @@ main() {
   item "Parsing build UTC date ...";
   UTC=$(file_getprop build.prop ro.build.date.utc);
   [ -z "$UTC" ] && UTC=$(file_getprop system-build.prop ro.build.date.utc);
-  date -u -d @$UTC;
+
+  if [[ "$UTC" =~ ^[0-9]+$ ]]; then
+    date -u -d @$UTC;
+  else
+    echo "Invalid or missing UTC date. Using default date: January 1, 2020."
+    UTC=1577836800
+    date -u -d @$UTC
+  fi;
 
   if [ "$UTC" -gt 1521158400 ]; then
     item "Build date newer than March 2018, adding SECURITY_PATCH ...";
