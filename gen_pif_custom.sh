@@ -116,7 +116,8 @@ case $user_choice in
     ;;
 esac
 
-  if [ "$FIRST_API_LEVEL" -gt 32 ]; then
+  # Skip the comparison if FIRST_API_LEVEL is "null"
+  if [ "$FIRST_API_LEVEL" != "null" ] && [ "$FIRST_API_LEVEL" -gt 32 ]; then
     item "First API level 33 or higher, resetting to 32 ...";
     FIRST_API_LEVEL=32;
   fi;
