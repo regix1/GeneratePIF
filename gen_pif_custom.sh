@@ -139,16 +139,9 @@ esac
   [ "$FORMAT" == "json" ] && echo '}' | tee -a custom.pif.json;
 
   echo
-  echo "PIF information:"
-  echo "Product: $PRODUCT"
-  echo "Device: $DEVICE"
   echo "Done!"
-
-  # After displaying all the information, call the confirm_and_delete function
-  confirm_and_delete "$selected_dir"
   cd ../
 }
-
 
 scan_for_build_prop() {
   local base_dir=$1
@@ -177,24 +170,6 @@ scan_for_build_prop() {
   echo "$found_files" | head -n 1  # Return the first found file path
 }
 
-
-confirm_and_delete() {
-  local selected_dir=$1
-  read -p "Did the PIF work correctly? (yes/no): " pif_confirmation
-  case $pif_confirmation in
-    [Yy][Ee][Ss])
-      echo "Great! Exiting the script."
-      ;;
-    [Nn][Oo])
-      echo "Deleting the folder: $selected_dir"
-      rm -rf "$selected_dir"
-      echo "Folder deleted."
-      ;;
-    *)
-      echo "Invalid input. Exiting the script."
-      ;;
-  esac
-}
 
 
 # Modified search_build_prop function to include scanning with prioritization
@@ -229,19 +204,18 @@ generate_options() {
 process_selection() {
   local arr_index=$1
   local total_options=$(( ${#dir_arr[@]} + 1 ))
-  local selected_dir
 
   if [ "$arr_index" -eq "$total_options" ]; then
     search_build_prop || exit 1
   elif [ "$arr_index" -gt 0 ] && [ "$arr_index" -le "${#dir_arr[@]}" ]; then
-    selected_dir=${dir_arr[$((arr_index - 1))]}
+    local selected_dir=${dir_arr[$((arr_index - 1))]}
     if [ "$selected_dir" = "./.git" ]; then
       echo "This is a .git folder. Rerun the script."
       exit 1
     fi
     cd "$shdir"
     cd "$selected_dir"
-    main "$selected_dir"  # Pass the selected directory to main
+    main
   else
     echo "Invalid option selected. Exiting..."
     exit 1
