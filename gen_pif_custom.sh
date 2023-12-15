@@ -139,8 +139,13 @@ esac
   [ "$FORMAT" == "json" ] && echo '}' | tee -a custom.pif.json;
 
   echo
+  echo "PIF information:"
+  echo "Product: $PRODUCT"
+  echo "Device: $DEVICE"
   echo "Done!"
-  confirm_and_delete "$selected_dir"  # Add this line to call the new function
+
+  # After displaying all the information, call the confirm_and_delete function
+  confirm_and_delete "$selected_dir"
   cd ../
 }
 
