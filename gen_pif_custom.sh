@@ -131,6 +131,7 @@ esac
   fi;
 
   item "Writing new custom.pif.$FORMAT ...";
+  echo "PIF generation complete. The output is:"
   [ "$FORMAT" == "json" ] && echo '{' | tee -a custom.pif.json;
   for PROP in $LIST; do
     case $FORMAT in
@@ -139,19 +140,6 @@ esac
     esac;
   done | sed '$s/,//' | tee -a custom.pif.$FORMAT;
   [ "$FORMAT" == "json" ] && echo '}' | tee -a custom.pif.json;
-
-
-  echo "PIF generation complete. The output is:"
-  echo "{
-    \"PRODUCT\": \"$PRODUCT\",
-    \"DEVICE\": \"$DEVICE\",
-    \"MANUFACTURER\": \"$MANUFACTURER\",
-    \"BRAND\": \"$BRAND\",
-    \"MODEL\": \"$MODEL\",
-    \"FINGERPRINT\": \"$FINGERPRINT\",
-    \"SECURITY_PATCH\": \"$SECURITY_PATCH\",
-    \"FIRST_API_LEVEL\": \"$FIRST_API_LEVEL\"
-  }"
 
   read -p "Did the PIF work as expected? (yes/no): " pif_worked
   if [[ "$pif_worked" =~ ^[Nn][Oo]$ ]]; then
