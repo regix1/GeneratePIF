@@ -8,6 +8,8 @@ echo -e "### System build.prop to custom.pif.json/.prop creator ### \
     \n# modified by Juleast @ https://github.com/juleast \
     \n# and modified again by regix1 @ https://github.com/regix1 \n#";
 
+selected_dir_path=""
+
 item() { echo -e "\n- $@"; }
 die() { 
   echo -e "\n\n! $@"
@@ -138,10 +140,34 @@ esac
   done | sed '$s/,//' | tee -a custom.pif.$FORMAT;
   [ "$FORMAT" == "json" ] && echo '}' | tee -a custom.pif.json;
 
+
+  echo "PIF generation complete. The output is:"
+  echo "{
+    \"PRODUCT\": \"$PRODUCT\",
+    \"DEVICE\": \"$DEVICE\",
+    \"MANUFACTURER\": \"$MANUFACTURER\",
+    \"BRAND\": \"$BRAND\",
+    \"MODEL\": \"$MODEL\",
+    \"FINGERPRINT\": \"$FINGERPRINT\",
+    \"SECURITY_PATCH\": \"$SECURITY_PATCH\",
+    \"FIRST_API_LEVEL\": \"$FIRST_API_LEVEL\"
+  }"
+
+  read -p "Did the PIF work as expected? (yes/no): " pif_worked
+  if [[ "$pif_worked" =~ ^[Nn][Oo]$ ]]; then
+      # If the PIF didn't work, offer to delete it
+      echo "Deleting files from $selected_dir_path..."
+      rm -rf "$shdir/$selected_dir_path" # Modify according to your needs
+      echo "Files deleted."
+  else
+      echo "Keeping the files."
+  fi
   echo
   echo "Done!"
   cd ../
 }
+
+
 
 scan_for_build_prop() {
   local base_dir=$1
@@ -200,7 +226,6 @@ generate_options() {
   echo "$i. search"
 }
 
-# Process user selection with dynamic option numbering
 process_selection() {
   local arr_index=$1
   local total_options=$(( ${#dir_arr[@]} + 1 ))
@@ -208,13 +233,13 @@ process_selection() {
   if [ "$arr_index" -eq "$total_options" ]; then
     search_build_prop || exit 1
   elif [ "$arr_index" -gt 0 ] && [ "$arr_index" -le "${#dir_arr[@]}" ]; then
-    local selected_dir=${dir_arr[$((arr_index - 1))]}
-    if [ "$selected_dir" = "./.git" ]; then
+    selected_dir_path=${dir_arr[$((arr_index - 1))]} # Track the selected directory
+    if [ "$selected_dir_path" = "./.git" ]; then
       echo "This is a .git folder. Rerun the script."
       exit 1
     fi
     cd "$shdir"
-    cd "$selected_dir"
+    cd "$selected_dir_path"
     main
   else
     echo "Invalid option selected. Exiting..."
