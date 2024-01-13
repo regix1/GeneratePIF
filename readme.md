@@ -124,26 +124,42 @@ If you would like to take on the tedious task of finding each prop value and the
   - ro.product.name
   - ro.product.system.name
   - ro.product.product.name
+  - ro.product.vendor.name
 - DEVICE:
   - ro.product.device
   - ro.product.system.device
-  - ro.product.product.name
+  - ro.product.product.device
+  - ro.product.vendor.device
 - MANUFACTURER:
   - ro.product.manufacturer
   - ro.product.system.manufacturer
   - ro.product.product.manufacturer
+  - ro.product.vendor.manufacturer
 - BRAND:
   - ro.product.brand
   - ro.product.system.brand
   - ro.product.product.brand
+  - ro.product.vendor.brand
 - MODEL:
   - ro.product.model
   - ro.product.system.model
   - ro.product.product.model
+  - ro.product.vendor.model
 - FINGERPRINT:
   - ro.build.fingerprint
   - ro.system.build.fingerprint
   - ro.product.build.fingerprint
+  - ro.product.vendor.fingerprint
+- FIRST_API_LEVEL (The first two items are what are looked for if not found, try finding the fallback values):
+  - ro.board.first_api_level
+  - ro.board.api_level
+  - **Fallback values**:
+    - ro.build.version.sdk
+    - ro.system.build.version.sdk
+    - ro.build.version.sd
+    - ro.system.build.version.sd
+    - ro.vendor.build.version.sdk
+    - ro.product.build.version.sdk
 
 Then save your file like this:
 
